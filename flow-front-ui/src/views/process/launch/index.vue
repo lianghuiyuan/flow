@@ -1,24 +1,15 @@
 <template>
-  <PageWrapper title="流程中心"  contentClass="flex" contentBackground class="!mt-4">
-
-    <template #footer>
-      <process-header current="launch"/>
-    </template>
-
+  <div class="desc-wrap process flex w-full">
     <BasicTree
       title="流程分类"
-      :clickRowToExpand="true"
       :treeData="treeData"
-      :replaceFields="{ key: 'id', title: 'name' }"
+      treeWrapperClassName="h-[calc(100%-35px)] overflow-auto"
       @select="handleSelect"
-      class="w-1/4 xl:w-1/5 mt-2"
-      ref="categoryTree"
-      :expandedKeys="['jituan', 'common']"
-      :selectedKeys="['common']"
+      class="w-1/4 xl:w-1/5"
+      ref="categoryTreeRef"
     />
 
-    <!--    <BasicTable class="w-3/4 xl:w-4/5" @register="registerTimeTable" />-->
-    <div class="w-3/4 xl:w-4/5 !mt-4" :class="`${prefixCls}__content`">
+    <div class="w-3/4 xl:w-4/5" style="margin-top:0; padding-top: 10px;" :class="`${prefixCls}__content`">
       <BasicForm
         :class="`${prefixCls}__header-form`"
         :labelWidth="100"
@@ -26,26 +17,17 @@
         :showActionButtonGroup="false"
       />
 
-      <a-list :pagination="pagination">
-        <template v-for="item in list" :key="item.id">
+      <a-list :pagination="pagination" :loading="modelListLoading">
+        <template v-for="item in modelInfoList" :key="item.id">
           <a-list-item class="list">
             <a-list-item-meta>
               <template #title>
                 <router-link :to="`/process/launch/${item.modelKey}`">
-                  <span>{{ item.title }}</span>
-                  <div class="extra" v-if="item.extra">
-                    {{ item.extra }}
+                  <span>{{ item.name }}</span>
+                  <div class="extra" v-if="item.categoryName">
+                    {{ item.categoryName }}
                   </div>
                 </router-link>
-              </template>
-              <template #description>
-                <div class="description">
-                  {{ item.description }}
-                </div>
-               <!-- <div class="info">
-                  <div><span>Owner</span>{{ item.author }}</div>
-                  <div><span>开始时间</span>{{ item.datetime }}</div>
-                </div>-->
               </template>
             </a-list-item-meta>
           </a-list-item>
@@ -53,20 +35,21 @@
       </a-list>
     </div>
 
-  </PageWrapper>
+  </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, onMounted, nextTick } from 'vue';
-  import { BasicTable, useTable } from '/@/components/Table';
+  import { defineComponent, ref, unref, onMounted, nextTick } from 'vue';
+  import { BasicTable } from '/@/components/Table';
   import { BasicForm } from '/@/components/Form/index';
 
   import { BasicTree, TreeItem } from '/@/components/Tree';
 
   import { PageWrapper } from '/@/components/Page';
-  import { Divider, Card, Empty, Descriptions, Steps, Tabs, List, Row, Col, Progress } from 'ant-design-vue';
+  import { List, Row, Col, Progress } from 'ant-design-vue';
 
   import { searchFormSchema, cardList } from './data';
   import ProcessHeader from '/@/views/process/components/ProcessHeader.vue';
+  import {getCategories, getModelInfoVoByPagerModel} from "/@/api/process/process";
 
   export default defineComponent({
     components: {
@@ -81,60 +64,63 @@
       BasicTree,
       BasicTable,
       ProcessHeader,
-      [Divider.name]: Divider,
-      [Card.name]: Card,
-      AEmpty: Empty,
-      [Descriptions.name]: Descriptions,
-      [Descriptions.Item.name]: Descriptions.Item,
-      [Steps.name]: Steps,
-      [Steps.Step.name]: Steps.Step,
-      [Tabs.name]: Tabs,
-      [Tabs.TabPane.name]: Tabs.TabPane,
     },
     setup() {
       const treeData = ref([]);
-      const categoryTree = ref();
+      const modelInfoList = ref([]);
+      const categoryTreeRef = ref(null);
+      const modelListLoading = ref(false);
 
-      treeData.value.push({
-        id: 'common', name: '通用流程',
-        children: [
-          {id: 'hr', name: 'HR通用流程'},
-          {id: 'finance', name: '发文流程'},
-          {id: 'fawu', name: '监管部流程'},
-          {id: 'gongguan', name: '工管流程'},
-        ],
-      });
-      treeData.value.push({
-        id: 'jituan', name: '集团总部',
-        children: [{
-          id: 'gongdi', name: '工地流程',
-        }]
-      });
+      onMounted(()=>{
+        fetch();
+      })
 
       async function fetch() {
-        // treeLoading.value = true;
-        // getCategories().then(res => {
-        //   treeData.value = (res as unknown) as TreeItem[];
-        // }).finally(()=>{
-        //   treeLoading.value = false;
-        // });
+        getCategories().then(res => {
+          treeData.value = (res as unknown) as TreeItem[];
+          nextTick(()=>{
+            unref(categoryTreeRef)?.filterByLevel(1);
+          })
+        });
+      }
+
+      function handleSelect(nodes) {
+        modelListLoading.value = true;
+        modelInfoList.value = [];
+        const code = nodes[0];
+        getModelInfoVoByPagerModel({categoryCode: code}).then(res=>{
+          modelInfoList.value = res.rows;
+          modelListLoading.value = false;
+        });
       }
 
       return {
         treeData,
         searchFormSchema,
         prefixCls: 'list-basic',
+        modelListLoading,
         list: cardList,
-        categoryTree,
+        modelInfoList,
+        categoryTreeRef,
+        handleSelect,
         pagination: {
+          change: (page, pageSize)=>{
+            console.log(page, pageSize);
+          },
           show: true,
-          pageSize: 3,
+          pageSize: 15,
         },
       };
     },
   });
 </script>
-
+<style lang="less">
+.process-list-container{
+  .vben-basic-table-form-container{
+    padding: 0!important;
+  }
+}
+</style>
 
 <style lang="less" scoped>
   .list-basic {

@@ -1,29 +1,28 @@
 <template>
-  <Button title="查看流程图" type="link" @click="showFlowDiagram">
-    <template #icon>
-      <ApartmentOutlined />
-    </template>
-  </Button>
-<!--  <FlowDiagramModal @register="registerFlowDiagramModal" />-->
+  <Tooltip >
+    <template #title>查看流程图</template>
+    <Button type="link" @click="showFlowDiagram">
+      <template #icon>
+        <ApartmentOutlined />
+      </template>
+    </Button>
+  </Tooltip>
   <BpmnPreviewModal @register="registerBpmnPreviewModal" />
-
 </template>
 <script lang="ts">
   import { defineComponent, ref, unref } from 'vue';
   import { ApartmentOutlined } from '@ant-design/icons-vue';
-  import { Button } from 'ant-design-vue';
+  import { Button, Tooltip } from 'ant-design-vue';
   import { useRouter } from 'vue-router';
 
-  // import FlowDiagramModal from './FlowDiagramModal.vue';
   import { useModal } from '/@/components/Modal';
   import BpmnPreviewModal from '/@/views/components/preview/bpmnPreview/index.vue';
 
   export default defineComponent({
     name: 'BaseActionButtons',
     components: {
-      Button,
+      Button, Tooltip,
       ApartmentOutlined,
-      // FlowDiagramModal,
       BpmnPreviewModal,
     },
     setup(_, {emit}) {
@@ -31,7 +30,6 @@
 
       const { params: {modelKey}, query : {taskId, procInstId} } = unref(currentRoute);
 
-      // const [registerFlowDiagramModal, { openModal, setModalProps }] = useModal();
       const [registerBpmnPreviewModal, { openModal: openBpmnPreviewModal, setModalProps: setBpmnPreviewProps }] = useModal();
 
       function showFlowDiagram(){
@@ -41,10 +39,11 @@
           isUpdate: true,
         });
         setBpmnPreviewProps({
-          //title: `预览-`,
-          bodyStyle: {padding: '0px', margin: '0px'},
-          width: 900, height: 400,
-          showOkBtn: false, showCancelBtn: true,
+          width: 900, minHeight: 400,
+          wrapperFooterOffset: 20,
+          useWrapper: false,
+          title: '查看 - 图预览',
+          showOkBtn: false,
           cancelText: '关闭'
         });
       }
@@ -54,7 +53,6 @@
       }
 
       return {
-        // registerFlowDiagramModal,
         registerBpmnPreviewModal,
         handleCloseFunc,
         showFlowDiagram,

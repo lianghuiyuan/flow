@@ -161,8 +161,19 @@ public class ModelInfoServiceImpl extends ServiceImpl<IModelInfoMapper, ModelInf
             modelInfo.setUpdator(user.getUserNo());
             modelInfo.setModelId(mi.getModelId());
             modelInfo.setExtendStatus(ModelFormStatusEnum.DFB.getStatus());
+
+            // 修改所属系统
+            Model model = modelService.getModel(modelInfo.getModelId());
+            if (StringUtils.isBlank(model.getTenantId())) {
+                // 未发布过才能修改所属系统
+                if(StringUtils.isNotBlank(modelInfo.getAppSn())){
+                    model.setTenantId(modelInfo.getAppSn());
+                    modelService.saveModel(model);
+                }
+            }
         }
         this.saveOrUpdate(modelInfo);
+
         return modelInfo;
     }
 

@@ -23,10 +23,25 @@ public class HighLightedNodeVo implements Serializable {
         this.activeActivityIds = activeActivityIds;
     }
 
+    public HighLightedNodeVo(List<String> highLightedFlows, List<String> activeActivityIds, String modelXml, String modelName) {
+        this.highLightedFlows = highLightedFlows;
+        this.activeActivityIds = activeActivityIds;
+        this.modelXml = modelXml;
+        this.modelName = modelName;
+    }
+
     //高亮线id集合
     private List<String> highLightedFlows;
-    //高亮节点id集合
+    //当前节点高亮节点id集合
     private List<String> activeActivityIds;
+    /**
+     * 已经完成的历史节点集合
+     */
+    private List<String> hisActiveActivityIds;
+    /**
+     * 未执行的节点id列表
+     */
+    private List<String> nullActiveActivityIds;
     //model的xml文件
     private String modelXml;
     //model的名称

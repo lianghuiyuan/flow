@@ -4,9 +4,6 @@
     <BasicTable @register="registerTable" class="w-3/4 xl:w-4/5">
       <template #toolbar>
         <a-button type="primary" @click="handleCreate"> 新增 </a-button>
-        <!--<Authority value="ModelInfo:4">
-          <a-button type="primary" @click="openTab">测试打开设计器</a-button>
-        </Authority>-->
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
@@ -15,7 +12,7 @@
       </template>
     </BasicTable>
 
-    <ModelInfoModal @register="registerModal" @success="handleSuccess" />
+    <ModelInfoModal @register="registerModal" @success="handleSuccess" @visible-change="handleModelInfoVisibleChange" />
     <BpmnPreviewModal @register="registerBpmnPreviewModal" @success="handleSuccess" />
 
   </PageWrapper>
@@ -53,12 +50,13 @@
     },
     setup() {
       const go = useGo();
-      const [registerModal, { openModal }] = useModal();
+      const [registerModal, { openModal, setModalProps: setFlowFormModalProps }] = useModal();
       // const [registerRoleModal, { openModal: openRoleSelector, setModalProps }] = useModal();
-      const [registerBpmnPreviewModal, { openModal: openBpmnPreviewModal, setModalProps: ssetBpmnPreviewProps }] = useModal();
+      const [registerBpmnPreviewModal, { openModal: openBpmnPreviewModal, setModalProps: setBpmnPreviewProps }] = useModal();
 
       const currentModelInfo = ref<Recordable>({});
       const currentCategory = ref<Recordable>({});
+      const currentCategoryCode = ref<Recordable>(null);
       const loadingRef = ref(false);
 
       const [registerTable, { getForm, reload }] = useTable({
@@ -103,8 +101,19 @@
         }
         openModal(true, {
           record:{categoryCode: unref(currentCategory).code},
-          isUpdate: true,
+          isUpdate: false,
+          
         });
+        setFlowFormModalProps({
+          maskClosable: false,
+          footer: null,
+          width: '100%',
+          canFullscreen: false,
+          destroyOnClose: true,
+          defaultFullscreen: true,
+          useWrapper: true,
+        });
+
       }
 
       function createActions(record: Recordable, column: BasicColumn): ActionItem[] {
@@ -164,7 +173,7 @@
           modelKey: record.modelKey,
           isUpdate: true,
         });
-        ssetBpmnPreviewProps({
+        setBpmnPreviewProps({
           title: `预览-${record.name}`,
           bodyStyle: {padding: '0px', margin: '0px'},
           width: 900, height: 400,
@@ -172,14 +181,21 @@
           cancelText: '关闭'
         });
       }
+
       function handleEdit(record: Recordable) {
+        //currentCategoryCode.value = record.categoryCode;
         openModal(true, {
           record,
           isUpdate: true,
         });
-      }
-      function openTab() {
-        go("/flowable/bpmn/designer?modelId=XXXXXXXXXXXXXXXXXXXXXXXX");
+        setFlowFormModalProps({
+          maskClosable: false,
+          footer: null,
+          width: '100%',
+          destroyOnClose: true,
+          canFullscreen: false,
+          defaultFullscreen: true,
+        });
       }
 
       function handleDelete(record: Recordable) {
@@ -216,8 +232,22 @@
 
       function handleSelect(node:any) {
         currentCategory.value = node;
+        currentCategoryCode.value = node.code;
         let searchInfo = {categoryCode: node?node.code:''};
         reload({ searchInfo });
+      }
+
+      function handleModelInfoVisibleChange(visible) {
+        if(!visible){
+          try {
+            let searchInfo = {categoryCode: currentCategoryCode.value||''};
+            setTimeout(()=>{
+              reload({ searchInfo });
+            }, 200);
+          }catch (e){
+
+          }
+        }
       }
 
       return {
@@ -233,12 +263,13 @@
         cancelDeleteRole,
         handleDelete,
         handleSuccess,
-        openTab,
         handleSelect,
+        handleModelInfoVisibleChange,
       };
     },
   });
 </script>
+
 
 <style lang="less" scoped>
   .modelInfo-roles{
@@ -246,4 +277,5 @@
       margin-right: 4px;
     }
   }
+
 </style>

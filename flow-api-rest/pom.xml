@@ -11,10 +11,16 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>flow-api-rest</artifactId>
     <version>${flow.version}</version>
+    <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>com.dragon</groupId>
             <artifactId>flow-core</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dragon</groupId>
+            <artifactId>flow-form-core</artifactId>
             <version>${flow.version}</version>
         </dependency>
         <dependency>

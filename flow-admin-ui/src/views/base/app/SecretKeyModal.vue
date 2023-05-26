@@ -6,12 +6,15 @@
       </template>
       <template #secretKeySlot="{ model, field }">
         <div class="">
-          <TextArea readonly :rows="4" v-model:value="model[field]" />
+          <TextArea readonly :rows="3" v-model:value="model[field]" />
           <Space class="mt-2">
-            <Popconfirm title="重新获取秘钥吗？" @confirm="refreshSecretKeyHandle(model)">
-              <template #icon><QuestionCircleOutlined style="color: red" /></template>
-              <a-button> 获取 </a-button>
-            </Popconfirm>
+            <span v-if="model['sn'] !== 'portal'">
+              <a-button v-if="!model[field]" @click="refreshSecretKeyHandle(model)"> 生成密钥 </a-button>
+              <Popconfirm v-else title="确定要重新生成秘钥吗？" @confirm="refreshSecretKeyHandle(model)">
+                <template #icon><QuestionCircleOutlined style="color: red" /></template>
+                <a-button> 更新密钥 </a-button>
+              </Popconfirm>
+            </span>
             <a-button type="primary" @click="handleCopy"> 复制 </a-button>
           </Space>
         </div>
@@ -43,7 +46,7 @@
       const { clipboardRef, copiedRef } = useCopyToClipboard();
 
       const [registerForm, { resetFields, setFieldsValue }] = useForm({
-        labelWidth: 100,
+        labelWidth: 150,
         schemas: secretKeyFormSchema,
         showActionButtonGroup: false,
       });

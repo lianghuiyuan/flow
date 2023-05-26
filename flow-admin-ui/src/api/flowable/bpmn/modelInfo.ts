@@ -29,8 +29,8 @@ export function getBpmnByModelKey(params: any) {
   return defHttp.get({ url: Api.GetBpmnByModelKey + '/' + params.modelKey, params:{} });
 }
 
-export const saveOrUpdate = (params?: ModelInfo) =>
-  defHttp.post({url: Api.SaveOrUpdate, params});
+export const saveFlowInfo = (params) =>
+  defHttp.post({url: Api.SaveOrUpdate, params}, {isReturnNativeResponse: true});
 
 export const publishBpmn = (params: any) =>
   defHttp.post({url: Api.PublishBpmn + "/" + params});

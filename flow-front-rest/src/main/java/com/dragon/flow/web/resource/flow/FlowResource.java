@@ -3,7 +3,9 @@ package com.dragon.flow.web.resource.flow;
 import com.dragon.flow.constant.FlowFrontConstant;
 import com.dragon.flow.enm.flowable.runtime.CommentTypeEnum;
 import com.dragon.flow.enm.flowable.runtime.ProcessStatusEnum;
+import com.dragon.flow.enm.form.ModelFormStatusEnum;
 import com.dragon.flow.exception.FlowException;
+import com.dragon.flow.model.flowable.ModelInfo;
 import com.dragon.flow.model.user.Account;
 import com.dragon.flow.vo.flowable.processinstance.InstanceQueryParamsVo;
 import com.dragon.flow.vo.flowable.task.CompleteTaskVo;
@@ -72,6 +74,12 @@ public class FlowResource extends BaseResource {
         System.out.println(FastJsonUtils.objectToJson(endVo));
     }
 
+    @PostMapping(value = "/getModelInfoVoByPagerModel", produces = "application/json")
+    public ReturnVo getModelInfoVoByPagerModel(HttpServletRequest request, @RequestBody ParamVo<ModelInfo> paramVo) {
+        paramVo.getEntity().setStatus(ModelFormStatusEnum.YFB.getStatus());
+        return this.applyPost(request, paramVo, FlowFrontConstant.GET_GETMODELINFOVOBYPAGERMODEL_URL);
+    }
+
     @PostMapping(value = "/findMyProcessinstancesPagerModel", produces = "application/json")
     public ReturnVo findMyProcessinstancesPagerModel(HttpServletRequest request, @RequestBody ParamVo<InstanceQueryParamsVo> processInstanceVoParamVo) {
         Account loginAccount = this.getLoginAccount(request);
@@ -123,6 +131,16 @@ public class FlowResource extends BaseResource {
         return returnVo;
     }
 
+    @GetMapping(value = "/getStartorBaseInfoVoByProcessInstanceId/{processInstanceId}", produces = "application/json")
+    public ReturnVo getStartorBaseInfoVoByProcessInstanceId(HttpServletRequest request, @PathVariable String processInstanceId) {
+        HttpHeaders headers = this.createHttpHeaders(request);
+        HttpEntity httpEntity = new HttpEntity<>(headers);
+        String url = this.getApiUrl(FlowFrontConstant.GET_GETSTARTORBASEINFOVOBYPROCESSINSTANCEID_URL)
+                + "?processInstanceId=" + processInstanceId;
+        ReturnVo returnVo = restTemplate.postForObject(url, httpEntity, ReturnVo.class, processInstanceId);
+        return returnVo;
+    }
+
     @PostMapping(value = "/complete", produces = "application/json")
     public ReturnVo complete(HttpServletRequest request, @RequestBody CompleteTaskVo completeTaskVo) throws FlowException {
         HttpHeaders headers = this.createHttpHeaders(request);
@@ -168,11 +186,29 @@ public class FlowResource extends BaseResource {
         return returnVo;
     }
 
+    @GetMapping(value = "/getModelInfoByModelKey/{modelKey}", produces = "application/json")
+    public ReturnVo getModelInfoByModelKey(HttpServletRequest request, @PathVariable String modelKey) {
+        HttpHeaders headers = this.createHttpHeaders(request);
+        HttpEntity httpEntity = new HttpEntity<>(headers);
+        String url = this.getApiUrl(FlowFrontConstant.GET_GETMODELINFOBYMODELKEY_URL) + "?modelKey=" + modelKey;
+        ReturnVo returnVo = restTemplate.postForObject(url, httpEntity, ReturnVo.class, modelKey);
+        return returnVo;
+    }
+
     @GetMapping(value = "/getApps", produces = "application/json")
     public ReturnVo getApps(HttpServletRequest request) {
         HttpHeaders headers = this.createHttpHeaders(request);
         HttpEntity httpEntity = new HttpEntity<>(headers);
         String url = this.getApiUrl(FlowFrontConstant.GET_APPS_URL);
+        ReturnVo returnVo = restTemplate.postForObject(url, httpEntity, ReturnVo.class);
+        return returnVo;
+    }
+
+    @GetMapping(value = "/getCategories", produces = "application/json")
+    public ReturnVo getCategories(HttpServletRequest request) {
+        HttpHeaders headers = this.createHttpHeaders(request);
+        HttpEntity httpEntity = new HttpEntity<>(headers);
+        String url = this.getApiUrl(FlowFrontConstant.GET_CATEGORIES_URL);
         ReturnVo returnVo = restTemplate.postForObject(url, httpEntity, ReturnVo.class);
         return returnVo;
     }

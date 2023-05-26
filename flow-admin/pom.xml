@@ -6,6 +6,7 @@
         <groupId>com.dragon</groupId>
         <artifactId>flow-parent</artifactId>
         <version>1.1.2-SNAPSHOT</version>
+        <relativePath></relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <version>${flow.version}</version>
@@ -21,6 +22,12 @@
         <dependency>
             <groupId>com.dragon</groupId>
             <artifactId>flow-admin-rest</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dragon</groupId>
+            <artifactId>flow-form-rest</artifactId>
             <version>${flow.version}</version>
         </dependency>
         <dependency>
